@@ -4,6 +4,10 @@ YouTube 바이럴 영상 분석 시스템 설정
 
 # YouTube API 설정
 import os
+from dotenv import load_dotenv
+
+# .env 파일 로드
+load_dotenv()
 
 # Streamlit secrets 또는 환경변수에서 API 키 가져오기
 try:
