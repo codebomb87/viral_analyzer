@@ -317,8 +317,8 @@ class KeywordAnalyzer:
         keyword_dict = dict(keywords_freq)
         
         # 한글 폰트 경로 찾기
-        from font_utils import get_korean_font_path
-        font_path = get_korean_font_path()
+        from font_utils import get_wordcloud_font_path
+        font_path = get_wordcloud_font_path()
         
         try:
             # 워드클라우드 생성

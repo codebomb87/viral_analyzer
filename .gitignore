@@ -37,8 +37,8 @@ ENV/
 *.swo
 *~
 
-# Fonts (will be downloaded automatically)
-fonts/
+# Fonts - allow fonts to be deployed for Streamlit Cloud
+# fonts/ - commented out to allow font deployment
 
 # OS
 .DS_Store
