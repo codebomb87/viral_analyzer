@@ -308,7 +308,7 @@ class KeywordAnalyzer:
         if not keywords_freq:
             fig, ax = plt.subplots(figsize=(6, 3))
             ax.text(0.5, 0.5, '키워드가 없습니다', ha='center', va='center', 
-                   fontsize=16, transform=ax.transAxes, fontfamily='Malgun Gothic')
+                   fontsize=16, transform=ax.transAxes)
             ax.set_xticks([])
             ax.set_yticks([])
             return fig
@@ -317,23 +317,33 @@ class KeywordAnalyzer:
         keyword_dict = dict(keywords_freq)
         
         # 한글 폰트 경로 찾기
-        from font_utils import get_wordcloud_font_path
-        font_path = get_wordcloud_font_path()
+        try:
+            from font_utils import get_wordcloud_font_path
+            font_path = get_wordcloud_font_path()
+        except Exception as e:
+            print(f"폰트 경로 가져오기 실패: {e}")
+            font_path = None
+        
+        # 워드클라우드 생성 시도
+        wordcloud_params = {
+            'width': width,
+            'height': height,
+            'background_color': background_color,
+            'max_words': max_words,
+            'relative_scaling': 0.5,
+            'min_font_size': 8,
+            'colormap': 'viridis'
+        }
+        
+        # 폰트가 있으면 추가
+        if font_path:
+            wordcloud_params['font_path'] = font_path
         
         try:
             # 워드클라우드 생성
-            wordcloud = WordCloud(
-                width=width,
-                height=height,
-                background_color=background_color,
-                max_words=max_words,
-                font_path=font_path,  # 한글 폰트 사용
-                relative_scaling=0.5,
-                min_font_size=8,
-                colormap='viridis'  # 다양한 색상 사용
-            ).generate_from_frequencies(keyword_dict)
+            wordcloud = WordCloud(**wordcloud_params).generate_from_frequencies(keyword_dict)
             
-            # 그래프 생성 (크기 더 줄임)
+            # 그래프 생성
             fig, ax = plt.subplots(figsize=(6, 3))
             ax.imshow(wordcloud, interpolation='bilinear')
             ax.axis('off')
@@ -342,12 +352,38 @@ class KeywordAnalyzer:
             
         except Exception as e:
             print(f"워드클라우드 생성 오류: {e}")
-            fig, ax = plt.subplots(figsize=(6, 3))
-            ax.text(0.5, 0.5, f'Error creating wordcloud: {str(e)}', 
-                   ha='center', va='center', fontsize=12, transform=ax.transAxes)
-            ax.set_xticks([])
-            ax.set_yticks([])
-            return fig
+            
+            # 폰트 없이 다시 시도
+            try:
+                if 'font_path' in wordcloud_params:
+                    del wordcloud_params['font_path']
+                wordcloud = WordCloud(**wordcloud_params).generate_from_frequencies(keyword_dict)
+                
+                fig, ax = plt.subplots(figsize=(6, 3))
+                ax.imshow(wordcloud, interpolation='bilinear')
+                ax.axis('off')
+                
+                print("⚠️ 한글 폰트 없이 워드클라우드를 생성했습니다.")
+                return fig
+                
+            except Exception as e2:
+                print(f"폰트 없는 워드클라우드 생성도 실패: {e2}")
+                
+                # 최종 대체: 텍스트 리스트로 표시
+                fig, ax = plt.subplots(figsize=(6, 3))
+                
+                # 상위 키워드들을 텍스트로 표시
+                top_keywords = list(keyword_dict.keys())[:10]
+                keyword_text = ", ".join(top_keywords)
+                
+                ax.text(0.5, 0.5, f'주요 키워드:\n{keyword_text}', 
+                       ha='center', va='center', fontsize=10, 
+                       transform=ax.transAxes, wrap=True)
+                ax.set_xticks([])
+                ax.set_yticks([])
+                ax.set_title('키워드 분석 결과')
+                
+                return fig
     
     def analyze_keyword_trends(self, videos_data, time_period='daily'):
         """

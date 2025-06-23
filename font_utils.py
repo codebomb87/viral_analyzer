@@ -32,6 +32,21 @@ def get_korean_font_path():
     Returns:
         str: 한글 폰트 경로 또는 None
     """
+    # 1순위: 로컬 fonts 폴더의 폰트 (배포용)
+    local_font_paths = [
+        os.path.join(os.path.dirname(__file__), 'fonts', 'NanumGothic.ttf'),
+        os.path.join(os.getcwd(), 'fonts', 'NanumGothic.ttf'),
+        './fonts/NanumGothic.ttf',
+        'fonts/NanumGothic.ttf'
+    ]
+    
+    # 로컬 폰트 우선 확인
+    for font_path in local_font_paths:
+        if os.path.exists(font_path):
+            abs_path = os.path.abspath(font_path)
+            print(f"✅ 로컬 폰트 발견: {abs_path}")
+            return abs_path
+    
     # Windows 시스템의 한글 폰트들
     windows_fonts = [
         'C:/Windows/Fonts/malgun.ttf',      # 맑은 고딕
@@ -201,14 +216,31 @@ def get_wordcloud_font_path():
     """
     WordCloud에서 사용할 한글 폰트 경로를 반환합니다.
     """
+    # 먼저 한글 폰트 경로 시도
     font_path = get_korean_font_path()
     if font_path and os.path.exists(font_path):
         return font_path
     
+    # 추가 로컬 폰트 경로들 확인
+    additional_local_paths = [
+        os.path.join(os.path.dirname(__file__), 'fonts', 'NanumGothic.ttf'),
+        './fonts/NanumGothic.ttf',
+        'fonts/NanumGothic.ttf'
+    ]
+    
+    for path in additional_local_paths:
+        if os.path.exists(path):
+            abs_path = os.path.abspath(path)
+            print(f"✅ WordCloud 로컬 폰트 사용: {abs_path}")
+            return abs_path
+    
     # 대체 폰트 경로들
     fallback_paths = [
         '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-        '/usr/share/fonts/TTF/DejaVuSans.ttf'
+        '/usr/share/fonts/TTF/DejaVuSans.ttf',
+        '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+        '/System/Library/Fonts/AppleGothic.ttf',  # macOS
+        'C:/Windows/Fonts/malgun.ttf'  # Windows
     ]
     
     for path in fallback_paths:
@@ -216,5 +248,5 @@ def get_wordcloud_font_path():
             print(f"✅ WordCloud 대체 폰트 사용: {path}")
             return path
     
-    print("⚠️ WordCloud용 폰트를 찾을 수 없습니다.")
+    print("⚠️ WordCloud용 폰트를 찾을 수 없습니다. 폰트 없이 실행됩니다.")
     return None 

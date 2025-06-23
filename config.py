@@ -102,4 +102,16 @@ PAGE_CONFIG = {
     "page_icon": "📺",
     "layout": "wide",
     "initial_sidebar_state": "expanded"
-} 
+}
+
+# 한글 폰트 경로 설정 (배포 환경용)
+KOREAN_FONT_PATHS = [
+    # 로컬 폰트 경로 (최우선)
+    "./fonts/NanumGothic.ttf",
+    "fonts/NanumGothic.ttf",
+    # 시스템 폰트 경로들
+    "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",
+    "/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+] 

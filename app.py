@@ -14,10 +14,23 @@ from keyword_analyzer import KeywordAnalyzer
 
 # 한글 폰트 설정 초기화
 try:
-    from font_utils import setup_matplotlib_korean
+    from font_utils import setup_matplotlib_korean, get_korean_font_path
+    
+    # 폰트 경로 미리 확인
+    font_path = get_korean_font_path()
+    if font_path:
+        print(f"✅ 한글 폰트 발견: {font_path}")
+    else:
+        print("⚠️ 한글 폰트를 찾을 수 없습니다. 기본 폰트를 사용합니다.")
+    
+    # Matplotlib 한글 폰트 설정
     setup_matplotlib_korean()
+    
 except Exception as e:
     print(f"폰트 설정 오류: {e}")
+    # 기본 설정으로 진행
+    import matplotlib.pyplot as plt
+    plt.rcParams['axes.unicode_minus'] = False
 
 # 페이지 설정
 st.set_page_config(**config.PAGE_CONFIG)
