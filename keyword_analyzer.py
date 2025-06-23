@@ -290,7 +290,7 @@ class KeywordAnalyzer:
             'total_videos_analyzed': len(videos_data)
         }
     
-    def create_wordcloud(self, keywords_freq, width=600, height=300, 
+    def create_wordcloud(self, keywords_freq, width=400, height=200, 
                         background_color='white', max_words=50):
         """
         키워드로 워드클라우드를 생성합니다.
@@ -306,9 +306,9 @@ class KeywordAnalyzer:
             matplotlib.figure.Figure: 워드클라우드 그림
         """
         if not keywords_freq:
-            fig, ax = plt.subplots(figsize=(10, 5))
+            fig, ax = plt.subplots(figsize=(6, 3))
             ax.text(0.5, 0.5, '키워드가 없습니다', ha='center', va='center', 
-                   fontsize=20, transform=ax.transAxes, fontfamily='Malgun Gothic')
+                   fontsize=16, transform=ax.transAxes, fontfamily='Malgun Gothic')
             ax.set_xticks([])
             ax.set_yticks([])
             return fig
@@ -329,12 +329,12 @@ class KeywordAnalyzer:
                 max_words=max_words,
                 font_path=font_path,  # 한글 폰트 사용
                 relative_scaling=0.5,
-                min_font_size=10,
+                min_font_size=8,
                 colormap='viridis'  # 다양한 색상 사용
             ).generate_from_frequencies(keyword_dict)
             
-            # 그래프 생성 (크기 줄임)
-            fig, ax = plt.subplots(figsize=(8, 4))
+            # 그래프 생성 (크기 더 줄임)
+            fig, ax = plt.subplots(figsize=(6, 3))
             ax.imshow(wordcloud, interpolation='bilinear')
             ax.axis('off')
             
@@ -342,7 +342,7 @@ class KeywordAnalyzer:
             
         except Exception as e:
             print(f"워드클라우드 생성 오류: {e}")
-            fig, ax = plt.subplots(figsize=(10, 5))
+            fig, ax = plt.subplots(figsize=(6, 3))
             ax.text(0.5, 0.5, f'Error creating wordcloud: {str(e)}', 
                    ha='center', va='center', fontsize=12, transform=ax.transAxes)
             ax.set_xticks([])
