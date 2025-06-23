@@ -3,7 +3,18 @@ YouTube 바이럴 영상 분석 시스템 설정
 """
 
 # YouTube API 설정
-YOUTUBE_API_KEY = "AIzaSyBAAEAUPu_7kKb_9amRx3tFckPY4iekzOE"
+import os
+
+# Streamlit secrets 또는 환경변수에서 API 키 가져오기
+try:
+    import streamlit as st
+    YOUTUBE_API_KEY = st.secrets.get("YOUTUBE_API_KEY", os.getenv("YOUTUBE_API_KEY"))
+except:
+    YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
+
+if not YOUTUBE_API_KEY:
+    raise ValueError("YOUTUBE_API_KEY를 환경변수 또는 Streamlit secrets에 설정해주세요.")
+
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
 

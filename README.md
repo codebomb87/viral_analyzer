@@ -58,12 +58,27 @@ nltk.download('stopwords')
 nltk.download('averaged_perceptron_tagger')
 ```
 
-## 🔑 API 키 설정
+## 🚨 보안 설정 (필수)
 
-1. [Google Cloud Console](https://console.cloud.google.com/)에서 프로젝트 생성
-2. YouTube Data API v3 활성화
-3. API 키 발급
-4. `config.py` 파일에서 `YOUTUBE_API_KEY` 값 수정
+### API Key 설정
+
+1. Google Cloud Console에서 YouTube Data API v3 키를 발급받으세요
+2. `.env.example` 파일을 `.env`로 복사하세요
+3. `.env` 파일에서 `your_youtube_api_key_here`를 실제 API key로 교체하세요
+
+```bash
+cp .env.example .env
+# .env 파일을 편집하여 API key 설정
+```
+
+### Streamlit Cloud 배포 시
+1. Streamlit Cloud 대시보드에서 Settings > Secrets로 이동
+2. 다음과 같이 설정하세요:
+```toml
+YOUTUBE_API_KEY = "your_actual_api_key_here"
+```
+
+⚠️ **중요**: `.env` 파일이나 실제 API key를 절대 git에 커밋하지 마세요!
 
 ## 🎯 실행 방법
 
@@ -141,6 +156,38 @@ Streamlit의 테마 설정을 통해 UI를 커스터마이징할 수 있습니�
 ## 📞 문의 및 지원
 
 프로젝트 사용 중 문제가 발생하거나 기능 개선 제안이 있으시면 이슈를 등록해 주세요.
+
+## 🚀 Streamlit Cloud 배포 방법
+
+### 1단계: GitHub에 코드 업로드
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/[your-username]/youtube-viral-analyzer.git
+git push -u origin main
+```
+
+### 2단계: Streamlit Cloud 배포
+1. [Streamlit Cloud](https://share.streamlit.io/) 접속
+2. GitHub 계정으로 로그인
+3. "New app" 클릭
+4. Repository 선택: `youtube-viral-analyzer`
+5. Branch: `main`
+6. Main file path: `app.py`
+
+### 3단계: Secrets 설정
+1. 배포된 앱 설정에서 "Secrets" 탭 클릭
+2. 다음 내용 입력:
+```toml
+YOUTUBE_API_KEY = "your-actual-api-key-here"
+```
+3. "Save" 클릭
+
+### 4단계: 배포 완료! 🎉
+- 앱이 자동으로 빌드되고 배포됩니다
+- 공유 가능한 URL이 생성됩니다
 
 ---
 
