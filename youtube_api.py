@@ -37,30 +37,55 @@ class YouTubeDataCollector:
             list: 검색된 영상 정보 리스트
         """
         try:
-            search_params = {
-                'part': 'id,snippet',
-                'q': query,
-                'type': 'video',
-                'maxResults': max_results,
-                'order': order,
-                'regionCode': region_code
-            }
+            all_video_ids = []
+            next_page_token = None
             
-            if published_after:
-                search_params['publishedAfter'] = f"{published_after}T00:00:00Z"
-            if published_before:
-                search_params['publishedBefore'] = f"{published_before}T23:59:59Z"
-            if video_duration:
-                search_params['videoDuration'] = video_duration
+            # YouTube API는 한 번에 최대 50개만 반환하므로 페이지네이션 구현
+            while len(all_video_ids) < max_results:
+                # 현재 요청에서 가져올 개수 계산
+                current_max = min(50, max_results - len(all_video_ids))
+                
+                search_params = {
+                    'part': 'id,snippet',
+                    'q': query,
+                    'type': 'video',
+                    'maxResults': current_max,
+                    'order': order,
+                    'regionCode': region_code
+                }
+                
+                if published_after:
+                    search_params['publishedAfter'] = f"{published_after}T00:00:00Z"
+                if published_before:
+                    search_params['publishedBefore'] = f"{published_before}T23:59:59Z"
+                if video_duration:
+                    search_params['videoDuration'] = video_duration
+                if next_page_token:
+                    search_params['pageToken'] = next_page_token
+                
+                search_response = self.youtube.search().list(**search_params).execute()
+                
+                # 현재 페이지의 비디오 ID 수집
+                page_video_ids = []
+                for item in search_response['items']:
+                    page_video_ids.append(item['id']['videoId'])
+                
+                all_video_ids.extend(page_video_ids)
+                
+                # 다음 페이지 토큰 확인
+                next_page_token = search_response.get('nextPageToken')
+                
+                # 다음 페이지가 없거나 원하는 개수를 달성했으면 중단
+                if not next_page_token or len(all_video_ids) >= max_results:
+                    break
             
-            search_response = self.youtube.search().list(**search_params).execute()
-            
-            video_ids = []
-            for item in search_response['items']:
-                video_ids.append(item['id']['videoId'])
+            # 원하는 개수만큼만 자르기
+            all_video_ids = all_video_ids[:max_results]
             
             # 영상 상세 정보 가져오기
-            videos_info = self.get_video_details(video_ids)
+            videos_info = self.get_video_details(all_video_ids)
+            
+            print(f"✅ 요청된 {max_results}개 중 {len(videos_info)}개의 영상 정보를 가져왔습니다.")
             
             return videos_info
             
@@ -78,32 +103,41 @@ class YouTubeDataCollector:
         Returns:
             list: 영상 상세 정보 리스트
         """
+        if not video_ids:
+            return []
+            
         try:
-            videos_response = self.youtube.videos().list(
-                part='id,snippet,statistics,contentDetails',
-                id=','.join(video_ids)
-            ).execute()
+            all_videos_info = []
             
-            videos_info = []
-            for item in videos_response['items']:
-                video_info = {
-                    'video_id': item['id'],
-                    'title': item['snippet']['title'],
-                    'description': item['snippet']['description'],
-                    'channel_title': item['snippet']['channelTitle'],
-                    'channel_id': item['snippet']['channelId'],
-                    'published_at': item['snippet']['publishedAt'],
-                    'tags': item['snippet'].get('tags', []),
-                    'category_id': item['snippet']['categoryId'],
-                    'view_count': int(item['statistics'].get('viewCount', 0)),
-                    'like_count': int(item['statistics'].get('likeCount', 0)),
-                    'comment_count': int(item['statistics'].get('commentCount', 0)),
-                    'duration': item['contentDetails']['duration'],
-                    'thumbnail_url': item['snippet']['thumbnails']['medium']['url']
-                }
-                videos_info.append(video_info)
+            # YouTube API는 한 번에 최대 50개의 비디오 ID만 처리할 수 있으므로 배치 처리
+            batch_size = 50
+            for i in range(0, len(video_ids), batch_size):
+                batch_ids = video_ids[i:i + batch_size]
+                
+                videos_response = self.youtube.videos().list(
+                    part='id,snippet,statistics,contentDetails',
+                    id=','.join(batch_ids)
+                ).execute()
+                
+                for item in videos_response['items']:
+                    video_info = {
+                        'video_id': item['id'],
+                        'title': item['snippet']['title'],
+                        'description': item['snippet']['description'],
+                        'channel_title': item['snippet']['channelTitle'],
+                        'channel_id': item['snippet']['channelId'],
+                        'published_at': item['snippet']['publishedAt'],
+                        'tags': item['snippet'].get('tags', []),
+                        'category_id': item['snippet']['categoryId'],
+                        'view_count': int(item['statistics'].get('viewCount', 0)),
+                        'like_count': int(item['statistics'].get('likeCount', 0)),
+                        'comment_count': int(item['statistics'].get('commentCount', 0)),
+                        'duration': item['contentDetails']['duration'],
+                        'thumbnail_url': item['snippet']['thumbnails']['medium']['url']
+                    }
+                    all_videos_info.append(video_info)
             
-            return videos_info
+            return all_videos_info
             
         except HttpError as e:
             print(f"YouTube API 오류: {e}")

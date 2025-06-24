@@ -155,7 +155,12 @@ def main():
                 st.session_state.current_order = order  # 현재 정렬 순서 저장
                 
                 # 검색 결과 요약 표시
-                st.success(f"🎯 총 {len(videos)}개의 영상을 찾았습니다!")
+                if len(videos) == max_results:
+                    st.success(f"🎯 요청하신 {max_results}개의 영상을 모두 찾았습니다!")
+                else:
+                    st.success(f"🎯 요청하신 {max_results}개 중 {len(videos)}개의 영상을 찾았습니다!")
+                    if len(videos) < max_results:
+                        st.info(f"💡 검색 조건에 맞는 영상이 {len(videos)}개만 있습니다. 더 넓은 조건으로 검색해보세요.")
                 
                 # 검색 조건 요약 표시
                 search_summary = []
